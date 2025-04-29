@@ -23,6 +23,7 @@ typedef enum estadobot
 
 void MDE_BOT1(void)
 {
+  static uint8_t estadobot = UP; 
   switch (estadobot)
   {
   case UP:
@@ -50,7 +51,6 @@ void MDE_BOT1(void)
       estadobot = RISINg; // revive el tiempo y pasa al estado sig si se suelta
       tiempo = 20;
     }
-
 
     break;
 
@@ -80,42 +80,52 @@ void MDE_BOT1(void)
   }
 }
 
-void ritmo (void)
+void ritmo(void)
 {
+  static uint8_t combinaciones=SEC0;
   switch (combinaciones)
   {
   case SEC0:
-  if (cont = 0)
-  {
-    PORTB |=(cont & 0X1F);
-  }
-  
-    
+    if (cont = 0)
+    {
+      PORTB |= (cont & 0X1F);
+    }
+
     break;
   case SEC1:
-  if (cont>3 || 0>cont)
-  {
-      PORTB |=(cont & 0X1F);
-  }
-  
+    if (cont > 3 || 0 > cont)
+    {
+      PORTB |= (cont & 0X1F);
+    }
 
-  break;
-  case SEC2: 
-
-  default:
     break;
+  case SEC2:
+    if (cont > 6 || 3 > cont)
+    {
+      PORTB |= (cont & 0X1F);
+    }
+    break;
+
+  case SEC3:
+    if (cont > 9 || 6 > cont)
+    {
+      PORTB |= (cont & 0X1F);
+    }
+    break;
+    default:
+    combinaciones = SEC0;
   }
 }
 
 void MDE_BOT1(void);
 
-
-
 void inicializacion_leds(void)
 {
   // Configuración de pines
-  DDRD |= 0xFC; // Los pines PD2 a PD7 como salidas 
-  DDRB |= (1<<PB0); // Los pines PB0 y  como salidas 
+  DDRD |= 0xFC;       // Los pines PD2 a PD7 como salidas
+  PORTB |= (1<<PB1);   //resistencia de pull up
+  DDRB &= ~(1 << PB1); // defino boton como entrada
+
 }
 
 void config_TIMER0(void)
@@ -135,10 +145,7 @@ ISR(TIMER0_COMPA_vect)
     PORTB ^= (1 << PORTB5); // me enciende el led del arduino
     multiplicador = 0;
   }
-
 }
-
-
 
 int main()
 {
@@ -147,7 +154,6 @@ int main()
   sei();
   while (1)
   {
-   
   }
 }
-//rito harakiri
+// rito harakiri
