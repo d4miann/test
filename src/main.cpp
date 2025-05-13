@@ -1,9 +1,10 @@
 #include <Arduino.h>
-#define BOT1 ((PINB >> PB1) & 0x01)
+#define BOT1 ((PINC >> PC1) & 0x01)
 #define ON 1
 #define OFF 0
 volatile uint64_t multiplicador;
 int8_t cont = 0;
+uint8_t secuenciador = 0;
 uint64_t tiempo = 0;
 typedef enum combinaciones
 {
@@ -41,6 +42,7 @@ void MDE_BOT1(void)
     }
     if (tiempo == 0 && BOT1 == OFF)
     {
+      secuenciador+1;
       estadobot = DOWN; // si el tiempo ya decremento pasa al sig estado
     }
     break;
@@ -88,29 +90,56 @@ void ritmo(void)
   case SEC0:
     if (cont = 0)
     {
-      PORTB |= (cont & 0X1F);
+      PORTD &= 0XF0;
+      PORTD |= (cont & 0X1F);
     }
+
+    if (secuenciador+1)
+    {
+      combinaciones=SEC1;
+    }
+    
 
     break;
   case SEC1:
     if (cont > 3 || 0 > cont)
     {
-      PORTB |= (cont & 0X1F);
+      PORTD &= 0XF0;
+      PORTD |= (cont & 0X1F);
+    }
+    
+    if (secuenciador+1)
+    {
+      combinaciones=SEC2;
     }
 
     break;
   case SEC2:
     if (cont > 6 || 3 > cont)
     {
-      PORTB |= (cont & 0X1F);
+      PORTD &= 0XF0;
+      PORTD |= (cont & 0X1F);
     }
+
+    if (secuenciador+1)
+    {
+      combinaciones=SEC3;
+    }
+
     break;
 
   case SEC3:
     if (cont > 9 || 6 > cont)
     {
-      PORTB |= (cont & 0X1F);
+      PORTD &= 0XF0;
+      PORTD |= (cont & 0X1F);
     }
+
+    if (secuenciador+1)
+    {
+      combinaciones=SEC0;
+    }
+
     break;
     default:
     combinaciones = SEC0;
@@ -123,8 +152,8 @@ void inicializacion_leds(void)
 {
   // Configuración de pines
   DDRD |= 0xFC;       // Los pines PD2 a PD7 como salidas
-  PORTB |= (1<<PB1);   //resistencia de pull up
-  DDRB &= ~(1 << PB1); // defino boton como entrada
+  PORTC |= (1<<PC1);   //resistencia de pull up
+  DDRC &= ~(1 << PC1); // defino boton como entrada
 
 }
 
@@ -149,11 +178,21 @@ ISR(TIMER0_COMPA_vect)
 
 int main()
 {
+  ritmo();
   inicializacion_leds();
   config_TIMER0();
   sei();
+  MDE_BOT1();
   while (1)
   {
+    ritmo();
+    MDE_BOT1();
+    if (tiempo-100==0)
+    {
+      cont+1;
+      cont%10;
+    }
+    
   }
 }
 // rito harakiri
